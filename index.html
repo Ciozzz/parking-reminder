@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>理想汽车 - 泊车提醒</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8f4f8 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* 主容器 */
+        .container {
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* 顶部标题 */
+        .header {
+            text-align: center;
+            margin: 40px 0 30px;
+        }
+        
+        .header h1 {
+            color: #007AFF;
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 122, 255, 0.2);
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        /* 主界面 */
+        .main-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .logo {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #007AFF 0%, #0056b3 100%);
+            border-radius: 20px;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 16px rgba(0, 122, 255, 0.3);
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .logo span {
+            color: white;
+            font-size: 48px;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+            100% {
+                transform: translateY(0px);
+            }
+        }
+        
+        /* 按钮样式 */
+        .button {
+            background: linear-gradient(135deg, #007AFF 0%, #0056b3 100%);
+            color: white;
+            padding: 18px 40px;
+            border: none;
+            border-radius: 30px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 122, 255, 0.4);
+        }
+        
+        .button:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+        }
+        
+        .button:disabled {
+            background: #cccccc;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* 泊车界面 */
+        .parking-screen {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 汽车动画容器 */
+        .car-animation {
+            width: 100%;
+            height: 200px;
+            margin: 30px 0;
+            position: relative;
+            background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .car {
+            width: 140px;
+            height: 65px;
+            position: absolute;
+            bottom: 35px;
+            left: -180px;
+            animation: driveIn 3s ease forwards;
+        }
+        
+        @keyframes driveIn {
+            0% {
+                left: -180px;
+            }
+            100% {
+                left: calc(50% - 70px);
+            }
+        }
+        
+        .car-body {
+            width: 100%;
+            height: 45px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 10px 25px 6px 6px;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .car-top {
+            width: 75%;
+            height: 28px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 18px 18px 0 0;
+            position: absolute;
+            top: -28px;
+            left: 12.5%;
+            box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .car-wheel {
+            width: 18px;
+            height: 18px;
+            background: #333;
+            border-radius: 50%;
+            position: absolute;
+            bottom: -9px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* 可爱理想L6细节 */
+        .car-window {
+            width: 90%;
+            height: 80%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 12px 12px 0 0;
+            position: absolute;
+            top: 5%;
+            left: 5%;
+        }
+        
+        .car-sunroof {
+            width: 40%;
+            height: 60%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 8px;
+            position: absolute;
+            top: 10%;
+            left: 30%;
+        }
+        
+        /* 可爱眼睛 */
+        .car-eyes {
+            position: absolute;
+            width: 100%;
+            height: 10px;
+            top: 15px;
+            display: flex;
+            justify-content: space-around;
+            padding: 0 30px;
+        }
+        
+        .car-eyes::before,
+        .car-eyes::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: #333;
+            border-radius: 50%;
+            position: relative;
+        }
+        
+        .car-eyes::before {
+            box-shadow: 0 0 0 2px #fff inset;
+        }
+        
+        .car-eyes::after {
+            box-shadow: 0 0 0 2px #fff inset;
+        }
+        
+        /* 可爱大灯 */
+        .car-headlight {
+            width: 10px;
+            height: 10px;
+            background: #ffd700;
+            border-radius: 50%;
+            position: absolute;
+            top: 12px;
+            box-shadow: 0 0 8px #ffd700, 0 0 12px #ffd700;
+            animation: blink 3s infinite;
+        }
+        
+        .car-headlight.left {
+            left: 15px;
+        }
+        
+        .car-headlight.right {
+            right: 15px;
+        }
+        
+        @keyframes blink {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+        
+        /* 理想L6 LOGO */
+        .car-logo {
+            width: 30px;
+            height: 12px;
+            background: linear-gradient(135deg, #007AFF 0%, #0056b3 100%);
+            border-radius: 6px;
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 2px 6px rgba(0, 122, 255, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .car-logo::before {
+            content: 'L6';
+            color: white;
+            font-size: 8px;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* 可爱微笑 */
+        .car-smile {
+            width: 20px;
+            height: 8px;
+            border: 2px solid #333;
+            border-top: none;
+            border-radius: 0 0 20px 20px;
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: smile 2s ease-in-out infinite;
+        }
+        
+        @keyframes smile {
+            0%, 100% {
+                transform: translateX(-50%) scale(1);
+            }
+            50% {
+                transform: translateX(-50%) scale(1.1);
+            }
+        }
+        
+        .car-wheel.front {
+            left: 20px;
+        }
+        
+        .car-wheel.rear {
+            right: 20px;
+        }
+        
+        .garage {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        .garage-line {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #999;
+            display: flex;
+            justify-content: space-around;
+        }
+        
+        .garage-line::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            width: 100%;
+            height: 2px;
+            background: #999;
+        }
+        
+        /* 时间显示 */
+        .time-display {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin: 30px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .time-title {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .time-value {
+            font-size: 48px;
+            font-weight: bold;
+            color: #007AFF;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .time-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+        }
+        
+        .time-item {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+        }
+        
+        /* 设置面板 */
+        .settings-panel {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin: 30px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .settings-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .duration-selector {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .duration-option {
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .duration-option:hover {
+            border-color: #007AFF;
+            color: #007AFF;
+        }
+        
+        .duration-option.selected {
+            background: #007AFF;
+            color: white;
+            border-color: #007AFF;
+        }
+        
+        /* 剩余时间 */
+        .remaining-time {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+        
+        .remaining-time h3 {
+            margin-bottom: 10px;
+        }
+        
+        .remaining-time .time-value {
+            color: white;
+        }
+        
+        /* 提醒按钮 */
+        .remind-button {
+            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+            color: #333;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+        }
+        
+        .remind-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 193, 7, 0.4);
+        }
+        
+        /* 泊车记录样式 */
+        .records-screen {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .records-list {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .record-item {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .record-item:last-child {
+            border-bottom: none;
+        }
+        
+        .record-item.empty {
+            text-align: center;
+            color: #999;
+            padding: 40px 20px;
+        }
+        
+        .record-time {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .record-duration {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .record-free-time {
+            font-size: 14px;
+            color: #28a745;
+            margin-top: 5px;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* 提醒动画样式 */
+        .reminder-animation {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: slideInRight 0.5s ease, pulse 1s ease-in-out infinite;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .reminder-content {
+            display: flex;
+            align-items: center;
+        }
+        
+        .reminder-icon {
+            font-size: 32px;
+            margin-right: 15px;
+            animation: bounce 1s ease-in-out infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        .reminder-text {
+            text-align: left;
+        }
+        
+        .reminder-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .reminder-message {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 28px;
+            }
+            
+            .time-value {
+                font-size: 36px;
+            }
+            
+            .button {
+                padding: 15px 30px;
+                font-size: 18px;
+            }
+            
+            .car {
+                width: 100px;
+                height: 50px;
+            }
+            
+            .reminder-animation {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部标题 -->
+        <div class="header">
+            <h1>小贝的L6 - 泊车提醒</h1>
+            <p>智能泊车时间管理助手</p>
+        </div>
+        
+        <!-- 主界面 -->
+        <div class="main-screen" id="mainScreen">
+            <div class="logo">
+                <span>🚗</span>
+            </div>
+            <h2>准备泊车</h2>
+            <p>当您停好车后，点击下方按钮开始计时</p>
+            <button class="button" id="startButton">开始泊车</button>
+        </div>
+        
+        <!-- 泊车界面 -->
+        <div class="parking-screen" id="parkingScreen">
+            <!-- 汽车动画 -->
+            <div class="car-animation">
+                <div class="garage">
+                    <div class="car">
+                        <div class="car-top">
+                            <!-- 可爱理想L6车顶细节 -->
+                            <div class="car-window"></div>
+                            <div class="car-sunroof"></div>
+                            <div class="car-eyes"></div>
+                        </div>
+                        <div class="car-body">
+                            <!-- 可爱理想L6车身细节 -->
+                            <div class="car-headlight left"></div>
+                            <div class="car-headlight right"></div>
+                            <div class="car-logo"></div>
+                            <div class="car-smile"></div>
+                            <div class="car-wheel front"></div>
+                            <div class="car-wheel rear"></div>
+                        </div>
+                    </div>
+                    <div class="garage-line"></div>
+                </div>
+            </div>
+            
+            <!-- 时间显示 -->
+            <div class="time-display">
+                <div class="time-row">
+                    <div class="time-item">
+                        <div class="time-title">已泊车时间</div>
+                        <div class="time-value" id="elapsedTime">00:00</div>
+                    </div>
+                    <div class="time-item">
+                        <div class="time-title">剩余时间</div>
+                        <div class="time-value" id="remainingTime">30:00</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 设置面板 -->
+            <div class="settings-panel">
+                <h3 class="settings-title">设置免费停车时长</h3>
+                <div class="duration-selector" id="durationSelector">
+                    <div class="duration-option selected" data-value="15">15分钟</div>
+                    <div class="duration-option" data-value="30">30分钟</div>
+                    <div class="duration-option" data-value="45">45分钟</div>
+                    <div class="duration-option" data-value="60">60分钟</div>
+                    <div class="duration-option" data-value="90">90分钟</div>
+                    <div class="duration-option" data-value="120">120分钟</div>
+                </div>
+            </div>
+            
+            <!-- 提醒设置面板 -->
+            <div class="settings-panel">
+                <h3 class="settings-title">设置提醒时间</h3>
+                <p style="text-align: center; color: #666; margin-bottom: 20px;">选择在免费时长结束前多久提醒</p>
+                <div class="duration-selector" id="reminderSelector">
+                    <div class="duration-option selected" data-value="10">提前10分钟</div>
+                    <div class="duration-option" data-value="5">提前5分钟</div>
+                    <div class="duration-option" data-value="15">提前15分钟</div>
+                    <div class="duration-option" data-value="20">提前20分钟</div>
+                    <div class="duration-option" data-value="30">提前30分钟</div>
+                </div>
+            </div>
+            
+            <!-- 提醒按钮 -->
+            <div style="text-align: center; margin: 30px 0;">
+                <button class="remind-button" id="remindButton">设置提醒</button>
+                <button class="remind-button" id="testRemindButton" style="background: linear-gradient(135deg, #28a745 0%, #218838 100%); margin-top: 10px;">测试提醒</button>
+            </div>
+            
+            <!-- 结束泊车按钮 -->
+            <button class="button" id="endButton">结束泊车</button>
+        </div>
+        
+        <!-- 泊车记录界面 -->
+        <div class="records-screen" id="recordsScreen">
+            <h2 style="text-align: center; margin: 30px 0; color: #007AFF;">泊车记录</h2>
+            <div class="records-list" id="recordsList">
+                <div class="record-item empty">
+                    <p>暂无泊车记录</p>
+                </div>
+            </div>
+            <button class="button" id="backButton" style="margin-top: 30px;">返回主页</button>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let parkingStatus = false;
+        let startTime = 0;
+        let timerInterval = null;
+        let freeDuration = 30; // 默认30分钟
+        let reminderTime = 10; // 默认提前10分钟提醒
+        let reminderSet = false;
+        let parkingRecords = [];
+        
+        // DOM元素
+        const mainScreen = document.getElementById('mainScreen');
+        const parkingScreen = document.getElementById('parkingScreen');
+        const recordsScreen = document.getElementById('recordsScreen');
+        const startButton = document.getElementById('startButton');
+        const endButton = document.getElementById('endButton');
+        const remindButton = document.getElementById('remindButton');
+        const backButton = document.getElementById('backButton');
+        const elapsedTime = document.getElementById('elapsedTime');
+        const remainingTime = document.getElementById('remainingTime');
+        const durationSelector = document.getElementById('durationSelector');
+        const reminderSelector = document.getElementById('reminderSelector');
+        const recordsList = document.getElementById('recordsList');
+        
+        // 确保提醒动画元素在DOM中
+        if (!document.querySelector('.reminder-animation')) {
+            const reminderAnimation = document.createElement('div');
+            reminderAnimation.className = 'reminder-animation';
+            reminderAnimation.id = 'reminderAnimation';
+            document.body.appendChild(reminderAnimation);
+        }
+        
+        // 初始化
+        window.addEventListener('load', function() {
+            // 加载本地存储的泊车记录
+            loadRecords();
+            
+            // 请求通知权限
+            requestNotificationPermission();
+        });
+        
+        // 请求通知权限
+        function requestNotificationPermission() {
+            if ('Notification' in window) {
+                Notification.requestPermission().then(function(permission) {
+                    console.log('Notification permission:', permission);
+                    // 显示权限状态
+                    if (permission === 'granted') {
+                        console.log('通知权限已授予');
+                    } else if (permission === 'denied') {
+                        console.log('通知权限已拒绝');
+                    } else {
+                        console.log('通知权限未决定');
+                    }
+                });
+            } else {
+                console.log('浏览器不支持通知功能');
+            }
+        }
+        
+        // 开始泊车
+        startButton.addEventListener('click', function() {
+            parkingStatus = true;
+            startTime = Date.now();
+            
+            // 切换界面
+            mainScreen.style.display = 'none';
+            parkingScreen.style.display = 'block';
+            recordsScreen.style.display = 'none';
+            
+            // 开始计时
+            startTimer();
+        });
+        
+        // 结束泊车
+        endButton.addEventListener('click', function() {
+            if (parkingStatus) {
+                const endTime = Date.now();
+                const duration = Math.floor((endTime - startTime) / 1000);
+                
+                // 保存泊车记录
+                saveRecord({
+                    startTime: startTime,
+                    endTime: endTime,
+                    duration: duration,
+                    freeDuration: freeDuration
+                });
+                
+                // 停止计时
+                stopTimer();
+                
+                // 切换界面
+                parkingScreen.style.display = 'none';
+                mainScreen.style.display = 'block';
+            }
+        });
+        
+        // 选择免费时长
+        durationSelector.addEventListener('click', function(e) {
+            if (e.target.classList.contains('duration-option')) {
+                // 移除所有选中状态
+                Array.from(durationSelector.querySelectorAll('.duration-option')).forEach(option => {
+                    option.classList.remove('selected');
+                });
+                
+                // 添加当前选中状态
+                e.target.classList.add('selected');
+                
+                // 更新免费时长
+                freeDuration = parseInt(e.target.dataset.value);
+                
+                // 重新计算剩余时间
+                updateRemainingTime();
+            }
+        });
+        
+        // 选择提醒时间
+        reminderSelector.addEventListener('click', function(e) {
+            if (e.target.classList.contains('duration-option')) {
+                // 移除所有选中状态
+                Array.from(reminderSelector.querySelectorAll('.duration-option')).forEach(option => {
+                    option.classList.remove('selected');
+                });
+                
+                // 添加当前选中状态
+                e.target.classList.add('selected');
+                
+                // 更新提醒时间
+                reminderTime = parseInt(e.target.dataset.value);
+            }
+        });
+        
+        // 设置提醒
+        remindButton.addEventListener('click', function() {
+            reminderSet = true;
+            showNotification('提醒已设置', '系统会在免费时长结束前提醒您');
+        });
+        
+        // 返回主页
+        backButton.addEventListener('click', function() {
+            recordsScreen.style.display = 'none';
+            mainScreen.style.display = 'block';
+        });
+        
+        // 测试提醒按钮
+        document.getElementById('testRemindButton').addEventListener('click', function() {
+            showReminder();
+        });
+        
+        // 查看记录按钮（添加到主界面）
+        const recordsButton = document.createElement('button');
+        recordsButton.className = 'button';
+        recordsButton.id = 'recordsButton';
+        recordsButton.textContent = '查看记录';
+        recordsButton.style.marginTop = '20px';
+        recordsButton.addEventListener('click', function() {
+            mainScreen.style.display = 'none';
+            recordsScreen.style.display = 'block';
+            renderRecords();
+        });
+        document.querySelector('.main-screen').appendChild(recordsButton);
+        
+        // 开始计时
+        function startTimer() {
+            // 清除之前的计时器
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            
+            // 增加检查频率，每500毫秒检查一次
+            timerInterval = setInterval(function() {
+                // 计算已泊车时间
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const elapsedMinutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                const elapsedSeconds = (elapsed % 60).toString().padStart(2, '0');
+                elapsedTime.textContent = `${elapsedMinutes}:${elapsedSeconds}`;
+                
+                // 更新剩余时间
+                updateRemainingTime();
+                
+                // 检查是否需要提醒
+                checkReminder();
+            }, 500);
+        }
+        
+        // 更新剩余时间
+        function updateRemainingTime() {
+            if (!parkingStatus) return;
+            
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const totalSeconds = freeDuration * 60;
+            const remainingSeconds = Math.max(0, totalSeconds - elapsed);
+            
+            const remainingMinutes = Math.floor(remainingSeconds / 60).toString().padStart(2, '0');
+            const remainingSecs = (remainingSeconds % 60).toString().padStart(2, '0');
+            remainingTime.textContent = `${remainingMinutes}:${remainingSecs}`;
+            
+            // 当剩余时间不足时，改变颜色
+            if (remainingSeconds < 300) { // 5分钟以内
+                remainingTime.style.color = '#dc3545';
+            } else if (remainingSeconds < 600) { // 10分钟以内
+                remainingTime.style.color = '#ffc107';
+            } else {
+                remainingTime.style.color = '#007AFF';
+            }
+        }
+        
+        // 检查提醒
+        function checkReminder() {
+            if (!reminderSet) return;
+            
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const totalSeconds = freeDuration * 60;
+            const remainingSeconds = totalSeconds - elapsed;
+            const reminderSeconds = reminderTime * 60;
+            
+            // 调试日志
+            console.log('检查提醒:', {
+                elapsed: elapsed,
+                totalSeconds: totalSeconds,
+                remainingSeconds: remainingSeconds,
+                reminderSeconds: reminderSeconds,
+                shouldRemind: remainingSeconds <= reminderSeconds
+            });
+            
+            // 使用更简单可靠的条件
+            // 当剩余时间小于等于提醒时间时触发
+            if (remainingSeconds <= reminderSeconds) {
+                console.log('触发提醒！剩余时间:', remainingSeconds, '秒');
+                showReminder();
+                // 避免重复触发
+                reminderSet = false;
+            }
+        }
+        
+        // 显示提醒
+        function showReminder() {
+            console.log('显示提醒');
+            
+            // 获取提醒动画元素
+            const reminderEl = document.getElementById('reminderAnimation');
+            if (reminderEl) {
+                // 设置提醒内容
+                reminderEl.innerHTML = `
+                    <div class="reminder-content">
+                        <div class="reminder-icon">🔔</div>
+                        <div class="reminder-text">
+                            <div class="reminder-title">小贝</div>
+                            <div class="reminder-message">该挪车啦！</div>
+                        </div>
+                    </div>
+                `;
+                
+                // 显示动画提醒
+                reminderEl.style.display = 'flex';
+                
+                // 3秒后隐藏
+                setTimeout(() => {
+                    if (reminderEl) {
+                        reminderEl.style.display = 'none';
+                    }
+                }, 3000);
+            }
+            
+            // 尝试显示系统通知
+            showNotification('小贝的L6', '该挪车啦！免费停车时长即将结束');
+            
+            // 同时显示alert作为备份
+            alert('小贝，该挪车啦！\n免费停车时长即将结束');
+        }
+        
+        // 显示通知
+        function showNotification(title, body) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                // 发送系统通知
+                new Notification(title, {
+                    body: body,
+                    icon: 'icon.png',
+                    badge: 'icon.png'
+                });
+            } else {
+                // 回退到alert
+                alert(`${title}: ${body}`);
+            }
+        }
+        
+        // 停止计时
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            
+            // 重置时间显示
+            elapsedTime.textContent = '00:00';
+            remainingTime.textContent = '30:00';
+            remainingTime.style.color = '#007AFF';
+            
+            // 重置提醒状态
+            reminderSet = false;
+        }
+        
+        // 保存泊车记录
+        function saveRecord(record) {
+            parkingRecords.unshift({
+                ...record,
+                id: Date.now().toString(),
+                date: new Date().toLocaleString('zh-CN')
+            });
+            
+            // 限制记录数量（最多保存10条）
+            if (parkingRecords.length > 10) {
+                parkingRecords = parkingRecords.slice(0, 10);
+            }
+            
+            // 保存到本地存储
+            localStorage.setItem('parkingRecords', JSON.stringify(parkingRecords));
+        }
+        
+        // 加载泊车记录
+        function loadRecords() {
+            const savedRecords = localStorage.getItem('parkingRecords');
+            if (savedRecords) {
+                parkingRecords = JSON.parse(savedRecords);
+            }
+        }
+        
+        // 渲染泊车记录
+        function renderRecords() {
+            recordsList.innerHTML = '';
+            
+            if (parkingRecords.length === 0) {
+                const emptyItem = document.createElement('div');
+                emptyItem.className = 'record-item empty';
+                emptyItem.innerHTML = '<p>暂无泊车记录</p>';
+                recordsList.appendChild(emptyItem);
+                return;
+            }
+            
+            parkingRecords.forEach(record => {
+                const recordItem = document.createElement('div');
+                recordItem.className = 'record-item';
+                
+                const durationMinutes = Math.floor(record.duration / 60);
+                const durationSeconds = record.duration % 60;
+                
+                recordItem.innerHTML = `
+                    <div class="record-time">${record.date}</div>
+                    <div class="record-duration">持续时间: ${durationMinutes.toString().padStart(2, '0')}:${durationSeconds.toString().padStart(2, '0')}</div>
+                    <div class="record-free-time">免费时长: ${record.freeDuration}分钟</div>
+                `;
+                
+                recordsList.appendChild(recordItem);
+            });
+        }
+    </script>
+</body>
+</html>
