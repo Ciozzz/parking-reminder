@@ -6,7 +6,7 @@
   "scripts": {
     "start": "python -m http.server 8080",
     "dev": "python -m http.server 8080",
-    "build": "mkdir -p dist && cp index.html dist/ && cp -r public/ dist/ && cp -r assets/ dist/"
+    "build": "powershell -Command \"if (!(Test-Path -Path 'dist')) { New-Item -ItemType Directory -Path 'dist' -Force } ; Copy-Item -Path 'index.html' -Destination 'dist' -Force ; Copy-Item -Path 'public' -Destination 'dist' -Recurse -Force ; Copy-Item -Path 'assets' -Destination 'dist' -Recurse -Force \""
   },
   "keywords": [
     "parking",
