@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "start": "python -m http.server 8080",
-    "dev": "python -m http.server 8080"
+    "dev": "python -m http.server 8080",
+    "build": "mkdir -p dist && cp index.html dist/ && cp -r public/ dist/ && cp -r assets/ dist/"
   },
   "keywords": [
     "parking",
@@ -14,9 +15,5 @@
     "pwa"
   ],
   "author": "",
-  "license": "MIT",
-  "vercel": {
-    "buildCommand": "echo '纯静态项目，无需构建'",
-    "outputDirectory": "."
-  }
+  "license": "MIT"
 }
