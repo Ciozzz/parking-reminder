@@ -14,5 +14,9 @@
     "pwa"
   ],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "vercel": {
+    "buildCommand": "echo '纯静态项目，无需构建'",
+    "outputDirectory": "."
+  }
 }
